@@ -3,6 +3,7 @@ import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ReactQueryProvider } from "@/components/providers/react-query-provider";
+import { Toaster } from "sonner";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -40,7 +41,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <ReactQueryProvider>{children}</ReactQueryProvider>
+          <ReactQueryProvider>
+            {children}
+            <Toaster richColors position="bottom-right" />
+          </ReactQueryProvider>
         </ThemeProvider>
       </body>
     </html>
