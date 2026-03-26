@@ -24,7 +24,7 @@ func init() {
 
 func TestGetCategories_Integration(t *testing.T) {
 	// Nil repo translates to runtime panic only when calling DB.
-	handler := skills.NewHandler(nil)
+	handler := skills.NewHandler(nil, nil, nil)
 	router := gin.New()
 	router.GET("/categories", handler.GetCategories)
 
@@ -35,7 +35,7 @@ func TestGetCategories_Integration(t *testing.T) {
 }
 
 func TestGetCategorySkills_MissingParam(t *testing.T) {
-	handler := skills.NewHandler(nil)
+	handler := skills.NewHandler(nil, nil, nil)
 	router := gin.New()
 	router.GET("/categories/:id/skills", handler.GetCategorySkills)
 	// Missing id param (Gin usually prevents this by routing logic, but handler handles explicit empty check)
