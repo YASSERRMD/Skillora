@@ -72,6 +72,8 @@ func main() {
 	embeddingAgent := agents.NewEmbeddingAgent(llmRouter, vectorRepo)
 
 	barterRepo := repository.NewBarterRepository(db.PG)
+	notifRepo := repository.NewNotificationRepository(db.PG)
+	notifHub := api.NewNotificationHub(notifRepo)
 
 	// Route Handlers
 	oauthCfg := auth.NewGoogleOAuthConfig()
@@ -133,6 +135,14 @@ func main() {
 		{
 			adminGrp.GET("/llm-providers", adminHandler.GetLLMProviders)
 			adminGrp.POST("/llm-providers", adminHandler.PostLLMProvider)
+		}
+		// Notifications
+		notifGrp := v1.Group("/notifications")
+		notifGrp.Use(api.RequireAuth())
+		{
+			notifGrp.GET("", api.GetNotificationsHandler(notifRepo))
+			notifGrp.POST("/read", api.MarkNotificationsReadHandler(notifRepo))
+			notifGrp.GET("/stream", notifHub.SSEHandler)
 		}
 	}
 
