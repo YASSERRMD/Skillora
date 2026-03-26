@@ -71,3 +71,32 @@ func (r *LLMRepository) InsertProvider(
 	}
 	return &p, nil
 }
+
+// GetAllProviders returns all configured LLM providers for the admin dashboard.
+func (r *LLMRepository) GetAllProviders(ctx context.Context) ([]models.LLMProvider, error) {
+	const q = `
+		SELECT id, provider_name, model_name, use_case, priority, is_active, created_at, updated_at
+		FROM llm_providers
+		ORDER BY use_case ASC, priority ASC
+	`
+	// Note: We intentionally DO NOT SELECT encrypted_api_key here to prevent accidental leakage in the admin fetch.
+	rows, err := r.db.Query(ctx, q)
+	if err != nil {
+		return nil, fmt.Errorf("GetAllProviders query: %w", err)
+	}
+	defer rows.Close()
+
+	var list []models.LLMProvider
+	for rows.Next() {
+		var p models.LLMProvider
+		// EncryptedAPIKey remains nil
+		if err := rows.Scan(
+			&p.ID, &p.ProviderName, &p.ModelName,
+			&p.UseCase, &p.Priority, &p.IsActive, &p.CreatedAt, &p.UpdatedAt,
+		); err != nil {
+			return nil, fmt.Errorf("GetAllProviders scan: %w", err)
+		}
+		list = append(list, p)
+	}
+	return list, rows.Err()
+}
