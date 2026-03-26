@@ -76,7 +76,7 @@ func main() {
 	// Route Handlers
 	oauthCfg := auth.NewGoogleOAuthConfig()
 	authHandler := auth.NewHandler(oauthCfg, userRepo)
-	userHandler := userapi.NewHandler(userRepo)
+	userHandler := userapi.NewHandler(userRepo, userSkillRepo)
 	adminHandler := adminapi.NewLLMHandler(llmRepo)
 	skillsHandler := skillsapi.NewHandler(skillRepo, userSkillRepo, appraisalAgent)
 	barterHandler := barterapi.NewHandler(barterRepo)
@@ -102,6 +102,8 @@ func main() {
 		{
 			userGrp.GET("/me", userHandler.GetMe)
 			userGrp.PUT("/me", userHandler.UpdateMe)
+			userGrp.GET("/skills", userHandler.GetMySkills)
+			userGrp.GET("/:id/skills", userHandler.GetUserSkills)
 		}
 
 		// Protected Skill Appraisal Route

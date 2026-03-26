@@ -12,8 +12,17 @@ export interface Skill {
   name: string;
   description: string;
 }
+export interface UserSkillDetail {
+  user_id: string;
+  skill_id: string;
+  skill_name: string;
+  category_name: string;
+  proficiency_level: number;
+  credit_value: number;
+  is_verified: boolean;
+}
 
-// Fetch all parent categories
+
 export const getCategories = async (): Promise<Category[]> => {
   const { data } = await api.get("/api/v1/categories");
   return data;

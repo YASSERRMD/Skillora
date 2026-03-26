@@ -12,12 +12,13 @@ import (
 
 // Handler holds user dependencies.
 type Handler struct {
-	repo *repository.UserRepository
+	repo          *repository.UserRepository
+	userSkillRepo *repository.UserSkillRepository
 }
 
 // NewHandler constructs a user Handler.
-func NewHandler(repo *repository.UserRepository) *Handler {
-	return &Handler{repo: repo}
+func NewHandler(repo *repository.UserRepository, userSkillRepo *repository.UserSkillRepository) *Handler {
+	return &Handler{repo: repo, userSkillRepo: userSkillRepo}
 }
 
 // GetMe returns the authenticated user's profile.
@@ -59,4 +60,32 @@ func (h *Handler) UpdateMe(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "ok", "bio": req.Bio})
+}
+
+// GetMySkills returns all verified skills for the authenticated user.
+// GET /api/v1/users/skills
+func (h *Handler) GetMySkills(c *gin.Context) {
+	userID := api.GetUserID(c)
+	skills, err := h.userSkillRepo.GetUserSkills(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load skills"})
+		return
+	}
+	c.JSON(http.StatusOK, skills)
+}
+
+// GetUserSkills returns all verified skills for a specific user ID.
+// GET /api/v1/users/:id/skills
+func (h *Handler) GetUserSkills(c *gin.Context) {
+	userID := c.Param("id")
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "missing user id"})
+		return
+	}
+	skills, err := h.userSkillRepo.GetUserSkills(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load skills"})
+		return
+	}
+	c.JSON(http.StatusOK, skills)
 }
