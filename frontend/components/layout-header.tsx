@@ -60,15 +60,13 @@ export function LayoutHeader() {
             <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
           ) : user && !isError ? (
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user.avatar_url || ""} alt={user.full_name} />
                     <AvatarFallback className="bg-primary/10 text-primary">
                       {user.full_name?.charAt(0).toUpperCase() || "U"}
                     </AvatarFallback>
                   </Avatar>
-                </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel className="font-normal">
@@ -80,11 +78,9 @@ export function LayoutHeader() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild className="cursor-pointer">
-                  <Link href="/dashboard">
+                <DropdownMenuItem className="cursor-pointer" onClick={() => window.location.href = "/dashboard"}>
                     <UserIcon className="mr-2 h-4 w-4" />
                     <span>Profile</span>
-                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-destructive focus:text-destructive cursor-pointer" onClick={handleLogout}>
