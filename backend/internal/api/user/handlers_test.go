@@ -46,7 +46,7 @@ func mockRequireAuth(mockUserID string) gin.HandlerFunc {
 // without testcontainers. We'll test the binding and error paths.
 func TestUpdateMe_BindingErrors(t *testing.T) {
 	// A nil repo will panic if it reaches DB, so we only test validation failure.
-	handler := user.NewHandler(nil)
+	handler := user.NewHandler(nil, nil)
 	router := gin.New()
 	router.PUT("/me", mockRequireAuth("test-id"), handler.UpdateMe)
 
