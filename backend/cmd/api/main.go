@@ -10,8 +10,16 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/skillora/backend/internal/agents"
 	"github.com/skillora/backend/internal/api"
+	adminapi "github.com/skillora/backend/internal/api/admin"
+	userapi "github.com/skillora/backend/internal/api/user"
+	skillsapi "github.com/skillora/backend/internal/api/skills"
+	"github.com/skillora/backend/internal/auth"
 	"github.com/skillora/backend/internal/config"
+	"github.com/skillora/backend/internal/db"
+	"github.com/skillora/backend/internal/llm"
+	"github.com/skillora/backend/internal/repository"
 )
 
 func main() {
@@ -29,9 +37,80 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"status": "ok", "service": "skillora-backend"})
 	})
 
-	// API v1 route group (populated by later phases).
+	// Initialize context for setup
+	ctxSetup := context.Background()
+
+	// Initialize Database and Cache
+	if err := db.InitPostgres(ctxSetup); err != nil {
+		log.Fatalf("failed to init postgres: %v", err)
+	}
+	defer db.ClosePostgres()
+
+	if err := db.InitRedis(ctxSetup); err != nil {
+		log.Fatalf("failed to init redis: %v", err)
+	}
+
+	// Wait for PG Vector readiness in real environment...
+	time.Sleep(1 * time.Second) // Tiny sleep ensuring connection pool settles
+
+	// Repositories
+	userRepo := repository.NewUserRepository(db.PG)
+	skillRepo := repository.NewSkillRepository(db.PG)
+	userSkillRepo := repository.NewUserSkillRepository(db.PG)
+	llmRepo := repository.NewLLMRepository(db.PG)
+
+	// LLM Pipeline & Orchestration
+	llmManager := llm.NewManager(llmRepo)
+	llmManager.StartBackgroundSync(ctxSetup)
+	llmRouter := llm.NewRouter(llmManager)
+
+	// Agents
+	appraisalAgent := agents.NewAppraisalAgent(llmRouter)
+
+	// Route Handlers
+	oauthCfg := auth.NewGoogleOAuthConfig()
+	authHandler := auth.NewHandler(oauthCfg, userRepo)
+	userHandler := userapi.NewHandler(userRepo)
+	adminHandler := adminapi.NewLLMHandler(llmRepo)
+	skillsHandler := skillsapi.NewHandler(skillRepo, userSkillRepo, appraisalAgent)
+
+	// --- Routes Setup ---
 	v1 := router.Group("/api/v1")
-	_ = v1
+	{
+		// Public Auth
+		authGrp := v1.Group("/auth")
+		{
+			authGrp.GET("/google/login", authHandler.GoogleLogin)
+			authGrp.GET("/google/callback", authHandler.GoogleCallback)
+		}
+
+		// Public Skills/Categories
+		v1.GET("/categories", skillsHandler.GetCategories)
+		v1.GET("/categories/:id/skills", skillsHandler.GetCategorySkills)
+
+		// Protected User Routes
+		userGrp := v1.Group("/users")
+		userGrp.Use(api.RequireAuth())
+		{
+			userGrp.GET("/me", userHandler.GetMe)
+			userGrp.PUT("/me", userHandler.UpdateMe)
+		}
+
+		// Protected Skill Appraisal Route
+		skillGrp := v1.Group("/skills")
+		skillGrp.Use(api.RequireAuth())
+		{
+			skillGrp.POST("/appraise", skillsHandler.PostAppraise)
+		}
+
+		// Internal Admin Routes (Basic Auth or Specific Role theoretically, utilizing RequireAuth for now)
+		adminGrp := v1.Group("/admin")
+		adminGrp.Use(api.RequireAuth())
+		{
+			adminGrp.GET("/llm-providers", adminHandler.GetLLMProviders)
+			adminGrp.POST("/llm-providers", adminHandler.PostLLMProvider)
+		}
+	}
 
 	// Build HTTP server.
 	srv := &http.Server{
