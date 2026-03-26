@@ -6,7 +6,7 @@
 
 <br/>
 
-> **The Vision:** This project was inspired by and blossomed from the [On-Demand Skill Exchange Platform](https://www.linkedin.com/pulse/on-demand-skill-exchange-platform-mohamed-yasser-ednqc/) article authored by **Mohamed Yasser**. In today’s fast-paced world, individuals are continuously seeking new ways to enhance their skills without financial barriers. Skillora is the technical manifestation of that vision: a modern Web3-inspired, AI-driven barter economy strictly for the exchange of knowledge.
+> **The Vision:** This project was inspired by and blossomed from my own [On-Demand Skill Exchange Platform](https://www.linkedin.com/pulse/on-demand-skill-exchange-platform-mohamed-yasser-ednqc/) article published on LinkedIn. In today’s fast-paced world, individuals are continuously seeking new ways to enhance their skills without financial barriers. Skillora is the technical manifestation of that vision: a modern Web3-inspired, AI-driven barter economy strictly for the exchange of knowledge.
 
 ---
 
