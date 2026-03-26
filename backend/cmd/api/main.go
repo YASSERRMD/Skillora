@@ -13,6 +13,7 @@ import (
 	"github.com/skillora/backend/internal/agents"
 	"github.com/skillora/backend/internal/api"
 	adminapi "github.com/skillora/backend/internal/api/admin"
+	barterapi "github.com/skillora/backend/internal/api/barter"
 	userapi "github.com/skillora/backend/internal/api/user"
 	skillsapi "github.com/skillora/backend/internal/api/skills"
 	"github.com/skillora/backend/internal/auth"
@@ -67,12 +68,15 @@ func main() {
 	// Agents
 	appraisalAgent := agents.NewAppraisalAgent(llmRouter)
 
+	barterRepo := repository.NewBarterRepository(db.PG)
+
 	// Route Handlers
 	oauthCfg := auth.NewGoogleOAuthConfig()
 	authHandler := auth.NewHandler(oauthCfg, userRepo)
 	userHandler := userapi.NewHandler(userRepo)
 	adminHandler := adminapi.NewLLMHandler(llmRepo)
 	skillsHandler := skillsapi.NewHandler(skillRepo, userSkillRepo, appraisalAgent)
+	barterHandler := barterapi.NewHandler(barterRepo)
 
 	// --- Routes Setup ---
 	v1 := router.Group("/api/v1")
@@ -101,6 +105,17 @@ func main() {
 		skillGrp.Use(api.RequireAuth())
 		{
 			skillGrp.POST("/appraise", skillsHandler.PostAppraise)
+		}
+
+		// Barter Economy Routes
+		barterGrp := v1.Group("/barters")
+		barterGrp.Use(api.RequireAuth())
+		{
+			barterGrp.POST("", barterHandler.PostPropose)
+			barterGrp.GET("", barterHandler.GetMyBarters)
+			barterGrp.GET("/balance", barterHandler.GetCreditBalance)
+			barterGrp.PATCH("/:id/status", barterHandler.PatchBarterStatus)
+			barterGrp.POST("/:id/complete", barterHandler.PostComplete)
 		}
 
 		// Internal Admin Routes (Basic Auth or Specific Role theoretically, utilizing RequireAuth for now)
