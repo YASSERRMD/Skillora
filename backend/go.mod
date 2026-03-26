@@ -9,6 +9,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/jackc/pgx/v5 v5.9.1
 	github.com/joho/godotenv v1.5.1
+	github.com/pgvector/pgvector-go v0.3.0
 	golang.org/x/oauth2 v0.36.0
 )
 
