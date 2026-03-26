@@ -9,10 +9,11 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-skillora}
       POSTGRES_USER: ${POSTGRES_USER:-skillora}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-skillora_secret}
-    ports:
-      - "5432:5432"
+    # No ports exposed to host. Only available to backend via skillora_net.
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      # Mount migrations for automatic initialization on fresh DB
+      - ./backend/migrations:/docker-entrypoint-initdb.d
     networks:
       - skillora_net
     healthcheck:
@@ -25,8 +26,7 @@ services:
     image: redis:7-alpine
     container_name: skillora_redis
     restart: unless-stopped
-    ports:
-      - "6379:6379"
+    # No ports exposed to host. Only available to backend via skillora_net.
     volumes:
       - redis_data:/data
     networks:
@@ -36,6 +36,55 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: skillora_backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080" # Exposed to outside for REST API usage and Frontend SSR/client calls
+    environment:
+      - PORT=8080
+      - DATABASE_URL=postgres://${POSTGRES_USER:-skillora}:${POSTGRES_PASSWORD:-skillora_secret}@skillora_postgres:5432/${POSTGRES_DB:-skillora}
+      - REDIS_URL=redis://skillora_redis:6379/0
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - JWT_SECRET=${JWT_SECRET:-super-secret-jwt-key-replace-in-prod}
+      - AES_MASTER_KEY=${AES_MASTER_KEY:-a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2}
+    networks:
+      - skillora_net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: skillora_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000" # Exposed to outside for web traffic
+    environment:
+      # Use localhost explicitly so client-side browser fetches hit the host mapped port.
+      # If using Docker networking for SSR, it needs to hit backend:8080, but client-side doesn't know "backend".
+      # Next.js standalone maps this universally right now through proxy routes or direct fetch.
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+      - PORT=3000
+    networks:
+      - skillora_net
+    depends_on:
+      backend:
+        condition: service_started
 
 volumes:
   postgres_data:
