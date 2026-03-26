@@ -16,6 +16,7 @@ import (
 	barterapi "github.com/skillora/backend/internal/api/barter"
 	userapi "github.com/skillora/backend/internal/api/user"
 	skillsapi "github.com/skillora/backend/internal/api/skills"
+	matchingapi "github.com/skillora/backend/internal/api/matching"
 	"github.com/skillora/backend/internal/auth"
 	"github.com/skillora/backend/internal/config"
 	"github.com/skillora/backend/internal/db"
@@ -67,6 +68,8 @@ func main() {
 
 	// Agents
 	appraisalAgent := agents.NewAppraisalAgent(llmRouter)
+	vectorRepo := repository.NewVectorRepository(db.PG)
+	embeddingAgent := agents.NewEmbeddingAgent(llmRouter, vectorRepo)
 
 	barterRepo := repository.NewBarterRepository(db.PG)
 
@@ -77,6 +80,7 @@ func main() {
 	adminHandler := adminapi.NewLLMHandler(llmRepo)
 	skillsHandler := skillsapi.NewHandler(skillRepo, userSkillRepo, appraisalAgent)
 	barterHandler := barterapi.NewHandler(barterRepo)
+	matchingHandler := matchingapi.NewHandler(vectorRepo, embeddingAgent)
 
 	// --- Routes Setup ---
 	v1 := router.Group("/api/v1")
@@ -106,6 +110,9 @@ func main() {
 		{
 			skillGrp.POST("/appraise", skillsHandler.PostAppraise)
 		}
+
+		// Matching Engine Route
+		v1.GET("/match", api.RequireAuth(), matchingHandler.GetMatches)
 
 		// Barter Economy Routes
 		barterGrp := v1.Group("/barters")
