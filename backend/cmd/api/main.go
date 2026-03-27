@@ -129,9 +129,9 @@ func main() {
 			barterGrp.POST("/:id/complete", barterHandler.PostComplete)
 		}
 
-		// Internal Admin Routes (Basic Auth or Specific Role theoretically, utilizing RequireAuth for now)
+		// Internal Admin Routes (Basic Auth protected for internal management)
 		adminGrp := v1.Group("/admin")
-		adminGrp.Use(api.RequireAuth())
+		adminGrp.Use(api.AdminBasicAuth())
 		{
 			adminGrp.GET("/llm-providers", adminHandler.GetLLMProviders)
 			adminGrp.POST("/llm-providers", adminHandler.PostLLMProvider)

@@ -17,6 +17,8 @@ type Config struct {
 	AESMasterKey       string
 	FrontendURL        string
 	Port               string
+	AdminUsername      string
+	AdminPassword      string
 }
 
 var C *Config
@@ -39,6 +41,8 @@ func Load() {
 		AESMasterKey:       mustEnv("AES_MASTER_KEY"),
 		FrontendURL:        getEnv("FRONTEND_URL", "http://localhost:3000"),
 		Port:               getEnv("PORT", "8080"),
+		AdminUsername:      getEnv("ADMIN_USERNAME", "admin"),
+		AdminPassword:      getEnv("ADMIN_PASSWORD", "skillora_pass_2026"),
 	}
 }
 

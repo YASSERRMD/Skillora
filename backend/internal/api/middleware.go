@@ -32,3 +32,10 @@ func CORSMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+// AdminBasicAuth protects admin routes using credentials from environment.
+func AdminBasicAuth() gin.HandlerFunc {
+	return gin.BasicAuth(gin.Accounts{
+		config.C.AdminUsername: config.C.AdminPassword,
+	})
+}
