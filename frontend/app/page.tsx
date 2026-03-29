@@ -10,7 +10,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-zinc-50 dark:bg-black overflow-hidden font-sans">
       {/* Navbar Minimal */}
-      <nav className="flex items-center justify-between p-6 w-full max-w-7xl mx-auto z-10">
+      <nav className="relative flex items-center justify-between p-6 w-full max-w-7xl mx-auto z-50">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-500/20">
             S
