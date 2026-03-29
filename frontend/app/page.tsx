@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Zap, Shield, Globe } from "lucide-react";
 
@@ -17,12 +18,12 @@ export default function Home() {
           <span className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Skillora</span>
         </div>
         <div className="flex items-center gap-4 relative z-50">
-          <Button variant="ghost" className="hidden sm:inline-flex text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-colors" asChild>
-            <Link href="/login">Sign In</Link>
-          </Button>
-          <Button className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white rounded-full shadow-md shadow-indigo-500/20 transition-all font-medium" asChild>
-            <Link href="/login">Get Started</Link>
-          </Button>
+          <Link href="/login" className={cn(buttonVariants({ variant: "ghost" }), "hidden sm:inline-flex text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-colors")}>
+            Sign In
+          </Link>
+          <Link href="/login" className={cn(buttonVariants({ variant: "default" }), "bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white rounded-full shadow-md shadow-indigo-500/20 transition-all font-medium")}>
+            Get Started
+          </Link>
         </div>
       </nav>
 
@@ -58,17 +59,13 @@ export default function Home() {
             transition={{ delay: 0.3, duration: 0.5 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 relative z-50"
           >
-            <Button size="lg" className="w-full sm:w-auto text-base h-14 px-8 rounded-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/25 transition-all hover:scale-105 active:scale-95 group font-medium" asChild>
-              <Link href="/login" className="w-full sm:flex items-center justify-center">
-                Enter the Marketplace
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </Button>
-            <Button size="lg" variant="outline" className="w-full sm:w-auto text-base h-14 px-8 rounded-full border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-900 dark:text-white transition-all font-medium" asChild>
-              <Link href="/marketplace" className="w-full sm:inline-flex">
-                Explore Skills
-              </Link>
-            </Button>
+            <Link href="/login" className={cn(buttonVariants({ size: "lg" }), "w-full sm:w-auto text-base h-14 px-8 rounded-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/25 transition-all hover:scale-105 active:scale-95 group font-medium sm:flex items-center justify-center")}>
+              Enter the Marketplace
+              <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <Link href="/marketplace" className={cn(buttonVariants({ size: "lg", variant: "outline" }), "w-full sm:w-auto text-base h-14 px-8 rounded-full border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-900 dark:text-white transition-all font-medium sm:inline-flex")}>
+              Explore Skills
+            </Link>
           </motion.div>
         </motion.div>
         
