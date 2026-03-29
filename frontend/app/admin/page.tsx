@@ -127,13 +127,15 @@ export default function AdminDashboardPage() {
             <CardDescription>Manage users and permissions</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button variant="outline" className="w-full justify-between h-12 rounded-xl border-zinc-200 opacity-50" disabled>
-              <span className="flex items-center gap-2">
-                <Shield className="h-4 w-4" />
-                Admin Privileges
-              </span>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+            <Link href="/admin/change-password">
+              <Button variant="outline" className="w-full justify-between h-12 rounded-xl border-zinc-200 hover:border-indigo-300 hover:bg-indigo-50/50 transition-all">
+                <span className="flex items-center gap-2">
+                  <Shield className="h-4 w-4" />
+                  Change Password
+                </span>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </Link>
             <Button variant="outline" className="w-full justify-between h-12 rounded-xl border-zinc-200 opacity-50" disabled>
               <span className="flex items-center gap-2">
                 <Users className="h-4 w-4" />

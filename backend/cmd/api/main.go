@@ -61,6 +61,7 @@ func main() {
 	skillRepo := repository.NewSkillRepository(db.PG)
 	userSkillRepo := repository.NewUserSkillRepository(db.PG)
 	llmRepo := repository.NewLLMRepository(db.PG)
+	adminCredRepo := repository.NewAdminCredentialsRepository(db.PG)
 
 	// LLM Pipeline & Orchestration
 	llmManager := llm.NewManager(llmRepo)
@@ -84,6 +85,7 @@ func main() {
 	userHandler := userapi.NewHandler(userRepo, userSkillRepo)
 	adminHandler := adminapi.NewLLMHandler(llmRepo)
 	userAdminHandler := adminapi.NewUserAdminHandler(userRepo)
+	adminAuthHandler := adminapi.NewAdminAuthHandler(adminCredRepo, userRepo)
 	skillsHandler := skillsapi.NewHandler(skillRepo, userSkillRepo, appraisalAgent)
 	barterHandler := barterapi.NewHandler(barterRepo, milestoneAgent)
 	matchingHandler := matchingapi.NewHandler(vectorRepo, embeddingAgent)
@@ -97,6 +99,9 @@ func main() {
 			authGrp.GET("/google/login", authHandler.GoogleLogin)
 			authGrp.GET("/google/callback", authHandler.GoogleCallback)
 		}
+
+		// Admin Login (username/password - separate from OAuth)
+		v1.POST("/admin/login", adminAuthHandler.Login)
 
 		// Public Skills/Categories
 		v1.GET("/categories", skillsHandler.GetCategories)
@@ -149,6 +154,7 @@ func main() {
 			adminGrp.GET("/llm-providers", adminHandler.GetLLMProviders)
 			adminGrp.POST("/llm-providers", adminHandler.PostLLMProvider)
 			adminGrp.POST("/users/grant-admin", userAdminHandler.GrantAdmin)
+			adminGrp.POST("/change-password", adminAuthHandler.ChangePassword)
 		}
 		// Notifications
 		notifGrp := v1.Group("/notifications")
