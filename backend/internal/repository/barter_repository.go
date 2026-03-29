@@ -143,3 +143,70 @@ func (r *BarterRepository) PostLedgerEntries(ctx context.Context, txID, payerID,
 
 	return pgTx.Commit(ctx)
 }
+
+// CreateMilestones inserts a set of progress steps for a barter agreement.
+func (r *BarterRepository) CreateMilestones(ctx context.Context, ms []models.Milestone) error {
+	const q = `
+		INSERT INTO milestones (barter_id, title, description, credit_portion, status)
+		VALUES ($1, $2, $3, $4, 'pending')
+	`
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	for _, m := range ms {
+		if _, err := tx.Exec(ctx, q, m.BarterID, m.Title, m.Description, m.CreditPortion); err != nil {
+			return fmt.Errorf("CreateMilestone: %w", err)
+		}
+	}
+	return tx.Commit(ctx)
+}
+
+// GetBarterMilestones retrieves the progress track for a specific exchange.
+func (r *BarterRepository) GetBarterMilestones(ctx context.Context, barterID string) ([]models.Milestone, error) {
+	const q = `
+		SELECT id, barter_id, title, description, credit_portion, status, created_at, updated_at
+		FROM milestones
+		WHERE barter_id = $1
+		ORDER BY created_at ASC
+	`
+	rows, err := r.db.Query(ctx, q, barterID)
+	if err != nil {
+		return nil, fmt.Errorf("GetBarterMilestones: %w", err)
+	}
+	defer rows.Close()
+
+	var list []models.Milestone
+	for rows.Next() {
+		var m models.Milestone
+		if err := rows.Scan(
+			&m.ID, &m.BarterID, &m.Title, &m.Description, &m.CreditPortion, &m.Status, &m.CreatedAt, &m.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		list = append(list, m)
+	}
+	return list, rows.Err()
+}
+
+// UpdateMilestoneStatus transitions a single milestone and optionally releases funds.
+func (r *BarterRepository) UpdateMilestoneStatus(ctx context.Context, milestoneID string, status models.MilestoneStatus) error {
+	const q = `UPDATE milestones SET status = $1 WHERE id = $2`
+	_, err := r.db.Exec(ctx, q, string(status), milestoneID)
+	return err
+}
+
+// GetMilestone retrieves a single milestone by ID.
+func (r *BarterRepository) GetMilestone(ctx context.Context, id string) (*models.Milestone, error) {
+	const q = `SELECT id, barter_id, title, description, credit_portion, status, created_at, updated_at FROM milestones WHERE id = $1`
+	var m models.Milestone
+	err := r.db.QueryRow(ctx, q, id).Scan(
+		&m.ID, &m.BarterID, &m.Title, &m.Description, &m.CreditPortion, &m.Status, &m.CreatedAt, &m.UpdatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &m, nil
+}

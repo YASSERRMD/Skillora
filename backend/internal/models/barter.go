@@ -25,6 +25,27 @@ type BarterTransaction struct {
 	UpdatedAt        time.Time    `db:"updated_at"         json:"updated_at"`
 }
 
+// MilestoneStatus represents the lifecycle of a single progress milestone.
+type MilestoneStatus string
+
+const (
+	MilestoneStatusPending   MilestoneStatus = "pending"
+	MilestoneStatusCompleted MilestoneStatus = "completed"
+	MilestoneStatusApproved  MilestoneStatus = "approved"
+)
+
+// Milestone is a staged part of a larger barter transaction agreement.
+type Milestone struct {
+	ID            string          `db:"id"             json:"id"`
+	BarterID      string          `db:"barter_id"      json:"barter_id"`
+	Title         string          `db:"title"          json:"title"`
+	Description   string          `db:"description"    json:"description"`
+	CreditPortion int             `db:"credit_portion" json:"credit_portion"`
+	Status        MilestoneStatus `db:"status"         json:"status"`
+	CreatedAt     time.Time       `db:"created_at"     json:"created_at"`
+	UpdatedAt     time.Time       `db:"updated_at"     json:"updated_at"`
+}
+
 // LedgerEntryType discriminates debits from credits.
 type LedgerEntryType string
 

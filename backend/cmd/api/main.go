@@ -22,6 +22,7 @@ import (
 	"github.com/skillora/backend/internal/db"
 	"github.com/skillora/backend/internal/llm"
 	"github.com/skillora/backend/internal/repository"
+	"github.com/skillora/backend/internal/ws"
 )
 
 func main() {
@@ -72,8 +73,10 @@ func main() {
 	embeddingAgent := agents.NewEmbeddingAgent(llmRouter, vectorRepo)
 
 	barterRepo := repository.NewBarterRepository(db.PG)
+	milestoneAgent := agents.NewMilestoneAgent(llmRouter)
 	notifRepo := repository.NewNotificationRepository(db.PG)
 	notifHub := api.NewNotificationHub(notifRepo)
+	wsHub := ws.NewHub()
 
 	// Route Handlers
 	oauthCfg := auth.NewGoogleOAuthConfig()
@@ -81,7 +84,7 @@ func main() {
 	userHandler := userapi.NewHandler(userRepo, userSkillRepo)
 	adminHandler := adminapi.NewLLMHandler(llmRepo)
 	skillsHandler := skillsapi.NewHandler(skillRepo, userSkillRepo, appraisalAgent)
-	barterHandler := barterapi.NewHandler(barterRepo)
+	barterHandler := barterapi.NewHandler(barterRepo, milestoneAgent)
 	matchingHandler := matchingapi.NewHandler(vectorRepo, embeddingAgent)
 
 	// --- Routes Setup ---
@@ -127,6 +130,15 @@ func main() {
 			barterGrp.GET("/balance", barterHandler.GetCreditBalance)
 			barterGrp.PATCH("/:id/status", barterHandler.PatchBarterStatus)
 			barterGrp.POST("/:id/complete", barterHandler.PostComplete)
+			barterGrp.GET("/:id/milestones", barterHandler.GetMilestones)
+		}
+
+		// Milestone specific actions
+		msGrp := v1.Group("/milestones")
+		msGrp.Use(api.RequireAuth())
+		{
+			msGrp.POST("/:id/complete", barterHandler.PostMilestoneComplete)
+			msGrp.POST("/:id/approve", barterHandler.PostMilestoneApprove)
 		}
 
 		// Internal Admin Routes (Basic Auth protected for internal management)
@@ -144,6 +156,9 @@ func main() {
 			notifGrp.POST("/read", api.MarkNotificationsReadHandler(notifRepo))
 			notifGrp.GET("/stream", notifHub.SSEHandler)
 		}
+
+		// Real-time WebSocket Hub
+		v1.GET("/ws", api.RequireAuth(), api.WSHandler(wsHub))
 	}
 
 	// Build HTTP server.

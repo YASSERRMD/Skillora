@@ -43,6 +43,24 @@ func NewHandler(oauthCfg *oauth2.Config, userRepo *repository.UserRepository) *H
 // GoogleLogin redirects the user to Google's OAuth2 consent screen.
 // GET /api/v1/auth/google/login
 func (h *Handler) GoogleLogin(c *gin.Context) {
+	// Dev Auth Bypass
+	if config.C.GoogleClientID == "your_google_client_id_here" || config.C.GoogleClientID == "dummy_google_client_id_for_dev" {
+		ctx := c.Request.Context()
+		user, _, err := h.userRepo.UpsertGoogleUser(ctx, "dev_sub_000", "dev@skillora.local", "Local Developer", "https://api.dicebear.com/7.x/avataaars/svg?seed=Dev")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "dev user upsert failed"})
+			return
+		}
+		jwtToken, err := crypto.GenerateJWT(user.ID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "dev token generation failed"})
+			return
+		}
+		c.SetCookie("skillora_token", jwtToken, int((7 * 24 * time.Hour).Seconds()), "/", "", false, true)
+		c.Redirect(http.StatusTemporaryRedirect, config.C.FrontendURL+"/dashboard")
+		return
+	}
+
 	state, err := generateState()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "state generation failed"})

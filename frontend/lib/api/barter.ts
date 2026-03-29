@@ -12,6 +12,17 @@ export interface BarterTransaction {
   updated_at: string;
 }
 
+export interface Milestone {
+  id: string;
+  barter_id: string;
+  title: string;
+  description: string;
+  credit_portion: number;
+  status: "pending" | "completed" | "approved";
+  created_at: string;
+  updated_at: string;
+}
+
 export interface ProposeBarterPayload {
   receiver_id: string;
   initiator_skill_id: string;
@@ -36,4 +47,17 @@ export const updateBarterStatus = async (barterID: string, status: "accepted" | 
 export const getCreditBalance = async (): Promise<number> => {
   const { data } = await api.get<{ credit_balance: number }>("/api/v1/barters/balance");
   return data.credit_balance;
+};
+
+export const getBarterMilestones = async (barterID: string): Promise<Milestone[]> => {
+  const { data } = await api.get<Milestone[]>(`/api/v1/barters/${barterID}/milestones`);
+  return data;
+};
+
+export const completeMilestone = async (id: string): Promise<void> => {
+  await api.post(`/api/v1/milestones/${id}/complete`);
+};
+
+export const approveMilestone = async (id: string): Promise<void> => {
+  await api.post(`/api/v1/milestones/${id}/approve`);
 };
