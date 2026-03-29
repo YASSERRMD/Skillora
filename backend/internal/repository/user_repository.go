@@ -33,7 +33,7 @@ func (r *UserRepository) UpsertGoogleUser(
 				full_name  = EXCLUDED.full_name,
 				avatar_url = EXCLUDED.avatar_url,
 				updated_at = NOW()
-		RETURNING id, google_id, email, full_name, avatar_url, bio, created_at, updated_at,
+		RETURNING id, google_id, email, full_name, avatar_url, bio, is_admin, created_at, updated_at,
 		          (xmax = 0) AS is_new
 	`
 
@@ -43,7 +43,7 @@ func (r *UserRepository) UpsertGoogleUser(
 	var isNew bool
 	err := row.Scan(
 		&u.ID, &u.GoogleID, &u.Email, &u.FullName, &u.AvatarURL,
-		&u.Bio, &u.CreatedAt, &u.UpdatedAt, &isNew,
+		&u.Bio, &u.IsAdmin, &u.CreatedAt, &u.UpdatedAt, &isNew,
 	)
 	if err != nil {
 		return nil, false, fmt.Errorf("upsert user: %w", err)
@@ -54,14 +54,14 @@ func (r *UserRepository) UpsertGoogleUser(
 // GetByID fetches a user by their primary key UUID.
 func (r *UserRepository) GetByID(ctx context.Context, id string) (*models.User, error) {
 	const q = `
-		SELECT id, google_id, email, full_name, avatar_url, bio, created_at, updated_at
+		SELECT id, google_id, email, full_name, avatar_url, bio, is_admin, created_at, updated_at
 		FROM users WHERE id = $1
 	`
 	row := r.db.QueryRow(ctx, q, id)
 	var u models.User
 	if err := row.Scan(
 		&u.ID, &u.GoogleID, &u.Email, &u.FullName, &u.AvatarURL,
-		&u.Bio, &u.CreatedAt, &u.UpdatedAt,
+		&u.Bio, &u.IsAdmin, &u.CreatedAt, &u.UpdatedAt,
 	); err != nil {
 		return nil, fmt.Errorf("get user by id: %w", err)
 	}

@@ -9,7 +9,8 @@ type User struct {
 	Email     string    `db:"email"      json:"email"`
 	FullName  string    `db:"full_name"  json:"full_name"`
 	AvatarURL *string   `db:"avatar_url" json:"avatar_url"`
-	Bio       string    `db:"bio"        json:"bio"`
-	CreatedAt time.Time `db:"created_at" json:"created_at"`
-	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
+	Bio       string     `db:"bio"        json:"bio"`
+	IsAdmin   bool       `db:"is_admin"   json:"is_admin"`
+	CreatedAt time.Time  `db:"created_at" json:"created_at"`
+	UpdatedAt time.Time  `db:"updated_at" json:"updated_at"`
 }
