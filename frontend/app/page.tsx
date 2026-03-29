@@ -16,13 +16,13 @@ export default function Home() {
           </div>
           <span className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Skillora</span>
         </div>
-        <div className="flex items-center gap-4">
-          <Link href="/login">
-            <Button variant="ghost" className="hidden sm:inline-flex text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-colors">Sign In</Button>
-          </Link>
-          <Link href="/login">
-            <Button className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white rounded-full shadow-md shadow-indigo-500/20 transition-all font-medium">Get Started</Button>
-          </Link>
+        <div className="flex items-center gap-4 relative z-50">
+          <Button variant="ghost" className="hidden sm:inline-flex text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-colors" asChild>
+            <Link href="/login">Sign In</Link>
+          </Button>
+          <Button className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white rounded-full shadow-md shadow-indigo-500/20 transition-all font-medium" asChild>
+            <Link href="/login">Get Started</Link>
+          </Button>
         </div>
       </nav>
 
@@ -56,19 +56,19 @@ export default function Home() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.5 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 relative z-50"
           >
-            <Link href="/login" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full sm:w-auto text-base h-14 px-8 rounded-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/25 transition-all hover:scale-105 active:scale-95 group font-medium">
+            <Button size="lg" className="w-full sm:w-auto text-base h-14 px-8 rounded-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/25 transition-all hover:scale-105 active:scale-95 group font-medium" asChild>
+              <Link href="/login" className="w-full sm:flex items-center justify-center">
                 Enter the Marketplace
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-            <Link href="/marketplace" className="w-full sm:w-auto">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto text-base h-14 px-8 rounded-full border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-900 dark:text-white transition-all font-medium">
+              </Link>
+            </Button>
+            <Button size="lg" variant="outline" className="w-full sm:w-auto text-base h-14 px-8 rounded-full border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-900 dark:text-white transition-all font-medium" asChild>
+              <Link href="/marketplace" className="w-full sm:inline-flex">
                 Explore Skills
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </motion.div>
         </motion.div>
         
