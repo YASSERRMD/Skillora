@@ -83,6 +83,7 @@ func main() {
 	authHandler := auth.NewHandler(oauthCfg, userRepo)
 	userHandler := userapi.NewHandler(userRepo, userSkillRepo)
 	adminHandler := adminapi.NewLLMHandler(llmRepo)
+	userAdminHandler := adminapi.NewUserAdminHandler(userRepo)
 	skillsHandler := skillsapi.NewHandler(skillRepo, userSkillRepo, appraisalAgent)
 	barterHandler := barterapi.NewHandler(barterRepo, milestoneAgent)
 	matchingHandler := matchingapi.NewHandler(vectorRepo, embeddingAgent)
@@ -147,6 +148,7 @@ func main() {
 		{
 			adminGrp.GET("/llm-providers", adminHandler.GetLLMProviders)
 			adminGrp.POST("/llm-providers", adminHandler.PostLLMProvider)
+			adminGrp.POST("/users/grant-admin", userAdminHandler.GrantAdmin)
 		}
 		// Notifications
 		notifGrp := v1.Group("/notifications")
