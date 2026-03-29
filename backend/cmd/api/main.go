@@ -141,9 +141,9 @@ func main() {
 			msGrp.POST("/:id/approve", barterHandler.PostMilestoneApprove)
 		}
 
-		// Internal Admin Routes (Basic Auth protected for internal management)
+		// Internal Admin Routes (Protected by role-based access control)
 		adminGrp := v1.Group("/admin")
-		adminGrp.Use(api.AdminBasicAuth())
+		adminGrp.Use(api.RequireAdmin(userRepo))
 		{
 			adminGrp.GET("/llm-providers", adminHandler.GetLLMProviders)
 			adminGrp.POST("/llm-providers", adminHandler.PostLLMProvider)
